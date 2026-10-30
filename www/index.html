@@ -5,206 +5,216 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Titik Karaoke</title>
 <style>
-  :root { --bg:#fff7e6; --ink:#2b2b2b; --card:#fff; --blue:#3b82f6; --green:#22c55e; --red:#ef4444; --yellow:#facc15; }
-  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body { margin:0; font-family:system-ui,sans-serif; background:var(--bg); color:var(--ink);
-         padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom); min-height:100vh; }
-  h1 { text-align:center; font-size:22px; margin:12px 0 4px; }
-  .stars { text-align:center; font-size:15px; margin-bottom:8px; }
-  .card { background:var(--card); border-radius:24px; padding:16px; text-align:center;
-          box-shadow:0 4px 0 rgba(0,0,0,.12); border:6px solid var(--yellow); transition:border-color .2s, background .2s; }
-  .card.ok { border-color:var(--green); background:#dcfce7; }
-  .card.bad { border-color:var(--red); background:#fee2e2; }
-  .big { font-size:96px; font-weight:800; line-height:1; }
-  .word { font-size:30px; font-weight:700; margin:4px 0; }
-  .emoji { font-size:64px; }
-  .msg { min-height:48px; font-size:18px; font-weight:600; margin-top:6px; }
-  .heard { font-size:13px; opacity:.65; min-height:18px; }
-  .row { display:flex; gap:10px; margin-top:12px; }
-  button { font:inherit; border:0; border-radius:18px; padding:14px; font-weight:700; font-size:17px;
-           color:#fff; background:var(--blue); box-shadow:0 4px 0 rgba(0,0,0,.2); flex:1; }
-  button:active { transform:translateY(2px); box-shadow:0 2px 0 rgba(0,0,0,.2); }
-  #mic { background:var(--green); font-size:22px; padding:18px; }
-  #mic.on { background:var(--red); animation:pulse 1s infinite; }
-  #karaoke { background:#a855f7; }
-  @keyframes pulse { 50% { transform:scale(1.04); } }
-  .grid { display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin:14px 0; }
-  .grid button { padding:10px 0; font-size:18px; background:#fff; color:var(--ink); border:2px solid #e5e7eb; box-shadow:none; }
-  .grid button.done { background:var(--green); color:#fff; border-color:var(--green); }
-  .grid button.sel { outline:4px solid var(--blue); }
+:root{--bg:#10324a;--panel:#15405e;--ink:#fff8e8;--sun:#ffc531;--ok:#2fd27a;--bad:#ff5a5f;--mute:#9fc3d9}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);
+ padding:env(safe-area-inset-top) 14px calc(env(safe-area-inset-bottom) + 14px)}
+h1{font-size:22px;margin:14px 0 8px;text-align:center}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+button{font:inherit;font-weight:700;border:0;border-radius:16px;padding:13px;color:#10324a;background:var(--sun);
+ box-shadow:0 4px 0 rgba(0,0,0,.3);cursor:pointer}
+button:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.3)}
+button.alt{background:var(--panel);color:var(--ink);box-shadow:none;border:2px solid #2a6288}
+button.on{background:var(--sun);color:#10324a;border-color:var(--sun)}
+.tabs button{flex:1}
+.hide{display:none!important}
+.stage{background:var(--panel);border:6px solid var(--sun);border-radius:28px;padding:14px;text-align:center;
+ transition:border-color .25s,background .25s}
+.stage.ok{border-color:var(--ok);background:#14614a}
+.stage.bad{border-color:var(--bad);background:#6a2a3c}
+canvas{width:100%;height:130px;display:block}
+.letter{font-size:110px;font-weight:900;line-height:1;margin:2px 0}
+.word{font-size:26px;font-weight:700}
+.emoji{font-size:56px}
+.msg{font-size:19px;font-weight:700;min-height:52px;margin-top:6px}
+.heard{font-size:13px;color:var(--mute);min-height:18px}
+.row{display:flex;gap:10px;margin-top:12px}.row>*{flex:1}
+.pick{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:14px 0}
+.pick button{padding:9px 0;font-size:16px}
+.slot{display:flex;align-items:center;gap:8px;background:var(--panel);border-radius:16px;padding:10px 12px;margin-bottom:8px}
+.slot b{flex:1;font-size:15px}
+.slot small{display:block;font-weight:400;color:var(--mute)}
+.slot button{padding:9px 12px;flex:none;font-size:15px}
+.slot .rec.live{background:var(--bad);color:#fff;animation:p 1s infinite}
+.dot{width:12px;height:12px;border-radius:50%;background:#2a6288;flex:none}.dot.has{background:var(--ok)}
+@keyframes p{50%{transform:scale(1.06)}}
+.note{font-size:14px;color:var(--mute);line-height:1.45;margin:8px 2px}
+@media (prefers-reduced-motion:reduce){.slot .rec.live{animation:none}}
 </style>
 </head>
 <body>
 <h1>🎤 Titik Karaoke</h1>
-<div class="stars" id="stars"></div>
-
-<div class="card" id="card">
-  <div class="big" id="letter">A</div>
-  <div class="emoji" id="emoji">🍎</div>
-  <div class="word" id="word">Apple</div>
-  <div class="msg" id="msg">Pindutin ang mic at sabihin: “A for Apple”</div>
-  <div class="heard" id="heard"></div>
+<div class="tabs">
+  <button class="on" id="tabS">🧒 Mag-aral</button>
+  <button class="alt" id="tabT">👩‍🏫 Guro</button>
 </div>
 
-<div class="row">
-  <button id="listen">🔊 Pakinggan</button>
-  <button id="mic">🎙️ Magsalita</button>
-</div>
-<div class="row">
-  <button id="karaoke">🎵 Kantahin ang A–Z</button>
-</div>
+<!-- ESTUDYANTE -->
+<section id="student">
+  <div class="stage" id="stage">
+    <canvas id="wave" height="130"></canvas>
+    <div class="letter hide" id="letter">A</div>
+    <div class="emoji hide" id="emoji">🍎</div>
+    <div class="word hide" id="word">Apple</div>
+    <div class="msg" id="msg">Pumili ng titik at pindutin ang Simulan.</div>
+    <div class="heard" id="heard"></div>
+  </div>
+  <div class="row"><button id="start">▶️ Simulan</button><button class="alt" id="stop">⏹️ Itigil</button></div>
+  <div class="pick" id="pick"></div>
+  <div class="row"><button class="alt" id="all">🎵 Lahat, A hanggang Z</button></div>
+</section>
 
-<div class="grid" id="grid"></div>
+<!-- GURO -->
+<section id="teacher" class="hide">
+  <p class="note">Irekord ang boses mo. Ang bawat titik ay may sariling awit; ang tatlong huling clip ay para sa lahat ng titik. Wala pang naka-record? May robot voice na pamalit.</p>
+  <div id="slots"></div>
+  <div class="row"><button id="exp">⬇️ I-export ang aralin</button><button class="alt" id="impB">⬆️ I-import</button></div>
+  <input type="file" id="imp" accept=".json,application/json" class="hide">
+  <p class="note" id="tmsg"></p>
+</section>
 
 <script>
-// titik, salita, emoji, at mga tunog na tinatanggap ng speech recognition
-const LETTERS = [
-  { l:'A', w:'Apple',     e:'🍎', a:['a','ay','hey','eh','8'] },
-  { l:'B', w:'Ball',      e:'⚽', a:['b','bee','be','bi','v'] },
-  { l:'C', w:'Cat',       e:'🐱', a:['c','see','sea','si'] },
-  { l:'D', w:'Dog',       e:'🐶', a:['d','dee','di','the'] },
-  { l:'E', w:'Egg',       e:'🥚', a:['e','ee','he'] },
-  { l:'F', w:'Fish',      e:'🐟', a:['f','ef','eff','if'] },
-  { l:'G', w:'Goat',      e:'🐐', a:['g','gee','ji','jee'] },
-  { l:'H', w:'Hat',       e:'🎩', a:['h','aitch','eich','age','ech'] },
-  { l:'I', w:'Ice cream', e:'🍦', a:['i','eye','ai','aye'] },
-  { l:'J', w:'Jar',       e:'🫙', a:['j','jay','jey'] },
-  { l:'K', w:'Kite',      e:'🪁', a:['k','kay','kei','okay'] },
-  { l:'L', w:'Lion',      e:'🦁', a:['l','el','elle','al'] },
-  { l:'M', w:'Moon',      e:'🌙', a:['m','em','am'] },
-  { l:'N', w:'Nest',      e:'🪹', a:['n','en','and','in'] },
-  { l:'O', w:'Orange',    e:'🍊', a:['o','oh','owe','0'] },
-  { l:'P', w:'Pen',       e:'🖊️', a:['p','pee','pea','pi'] },
-  { l:'Q', w:'Queen',     e:'👑', a:['q','queue','cue','kyu','kew'] },
-  { l:'R', w:'Rabbit',    e:'🐰', a:['r','are','ar','our'] },
-  { l:'S', w:'Sun',       e:'☀️', a:['s','es','ess','yes'] },
-  { l:'T', w:'Tree',      e:'🌳', a:['t','tee','tea','ti'] },
-  { l:'U', w:'Umbrella',  e:'☂️', a:['u','you','yu','ew'] },
-  { l:'V', w:'Van',       e:'🚐', a:['v','vee','vi','we'] },
-  { l:'W', w:'Water',     e:'💧', a:['w','double u','doubleu','double you','doubleyou'] },
-  { l:'X', w:'X-ray',     e:'🩻', a:['x','ex','eggs'] },
-  { l:'Y', w:'Yo-yo',     e:'🪀', a:['y','why','wai','wy'] },
-  { l:'Z', w:'Zebra',     e:'🦓', a:['z','zee','zed','zi'] },
-];
+const L=[['A','Apple','🍎',['a','ay','hey','eh','8']],['B','Ball','⚽',['b','bee','be','bi','v']],['C','Cat','🐱',['c','see','sea','si']],
+['D','Dog','🐶',['d','dee','di','the']],['E','Egg','🥚',['e','ee','he']],['F','Fish','🐟',['f','ef','eff','if']],
+['G','Goat','🐐',['g','gee','ji','jee']],['H','Hat','🎩',['h','aitch','eich','age','ech']],['I','Ice cream','🍦',['i','eye','ai','aye']],
+['J','Jar','🫙',['j','jay','jey']],['K','Kite','🪁',['k','kay','kei','okay']],['L','Lion','🦁',['l','el','elle','al']],
+['M','Moon','🌙',['m','em','am']],['N','Nest','🪹',['n','en','and','in']],['O','Orange','🍊',['o','oh','owe','0']],
+['P','Pen','🖊️',['p','pee','pea','pi']],['Q','Queen','👑',['q','queue','cue','kyu','kew']],['R','Rabbit','🐰',['r','are','ar','our']],
+['S','Sun','☀️',['s','es','ess','yes']],['T','Tree','🌳',['t','tee','tea','ti']],['U','Umbrella','☂️',['u','you','yu','ew']],
+['V','Van','🚐',['v','vee','vi','we']],['W','Water','💧',['w','double u','doubleu','double you']],['X','X-ray','🩻',['x','ex','eggs']],
+['Y','Yo-yo','🪀',['y','why','wai','wy']],['Z','Zebra','🦓',['z','zee','zed','zi']]];
+const SHARED=[['intro','Pambungad: "Ikaw naman…"','Tinutugon bago kumanta ang bata'],
+ ['mali','Kapag mali: "Ulitin natin…"','Sinasabi kapag mali ang sagot'],
+ ['tama','Kapag tama: "Tama ang sagot mo…"','Sinasabi kapag tama ang sagot']];
+const TTS={intro:'Ikaw naman!',mali:'Ulitin natin. Anong tunog ng letra?',tama:'Tama ang sagot mo! Pakinggan mo muli ako.'};
+const $=id=>document.getElementById(id);
+let idx=0,run=false,token=0,clips={};   // clips: key -> {type,data:Blob}
 
-let idx = 0, busy = false, stopKaraoke = false;
-let done = JSON.parse(localStorage.getItem('titik_done') || '[]');
-const $ = id => document.getElementById(id);
+/* ---------- IndexedDB ---------- */
+let db;
+const dbReady=new Promise(r=>{try{const q=indexedDB.open('titik',1);q.onupgradeneeded=()=>q.result.createObjectStore('c');
+ q.onsuccess=()=>{db=q.result;r()};q.onerror=()=>r()}catch(e){r()}});
+function dbAll(){return new Promise(r=>{if(!db)return r();const o=db.transaction('c').objectStore('c').openCursor();
+ o.onsuccess=()=>{const c=o.result;if(c){clips[c.key]=c.value;c.continue()}else r()};o.onerror=()=>r()})}
+function dbPut(k,v){if(db)db.transaction('c','readwrite').objectStore('c').put(v,k)}
+function dbDel(k){if(db)db.transaction('c','readwrite').objectStore('c').delete(k)}
 
-function render() {
-  const d = LETTERS[idx];
-  $('letter').textContent = d.l; $('emoji').textContent = d.e; $('word').textContent = d.w;
-  $('card').className = 'card'; $('heard').textContent = '';
-  $('msg').textContent = `Pindutin ang mic at sabihin: “${d.l} for ${d.w}”`;
-  [...$('grid').children].forEach((b, i) => {
-    b.classList.toggle('sel', i === idx);
-    b.classList.toggle('done', done.includes(LETTERS[i].l));
-  });
-  $('stars').textContent = `⭐ ${done.length} / 26 na tamang sagot`;
-}
-function buildGrid() {
-  LETTERS.forEach((d, i) => {
-    const b = document.createElement('button');
-    b.textContent = d.l;
-    b.onclick = () => { idx = i; render(); speak(`${d.l} for ${d.w}`); };
-    $('grid').appendChild(b);
-  });
-}
+/* ---------- Sound wave ---------- */
+const cv=$('wave'),cx=cv.getContext('2d');let level=0,tgt=0.12,ph=0,actx,an,buf;
+function fit(){const r=devicePixelRatio||1;cv.width=cv.clientWidth*r;cv.height=130*r}
+addEventListener('resize',fit);fit();
+function draw(){
+  const w=cv.width,h=cv.height,r=devicePixelRatio||1;let a=tgt;
+  if(an&&playing){an.getByteTimeDomainData(buf);let s=0;for(const v of buf)s+=Math.abs(v-128);a=Math.max(.15,Math.min(1,s/buf.length/40))}
+  level+=(a-level)*.15;ph+=.12;cx.clearRect(0,0,w,h);cx.lineCap='round';cx.lineWidth=5*r;
+  const n=Math.floor(w/(12*r));
+  for(let i=0;i<n;i++){const x=(i+.5)*w/n,e=Math.sin(Math.PI*i/(n-1));
+    const v=(Math.sin(i*.45+ph)*.5+.5)*.7+.3,len=Math.max(4*r,level*v*e*h*.9);
+    cx.strokeStyle=i%2?'#ffc531':'#8fe3ff';cx.beginPath();cx.moveTo(x,h/2-len/2);cx.lineTo(x,h/2+len/2);cx.stroke()}
+  requestAnimationFrame(draw)}
+draw();
 
-// Teacher voice
-function speak(text, rate = 0.8, pitch = 1.3) {
-  return new Promise(res => {
-    if (!('speechSynthesis' in window)) return res();
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-US'; u.rate = rate; u.pitch = pitch;
-    u.onend = u.onerror = () => res();
-    speechSynthesis.speak(u);
-  });
-}
+/* ---------- Playback (teacher clip or robot voice) ---------- */
+let playing=false,audioEl=null;
+function stopAudio(){speechSynthesis.cancel();if(audioEl){audioEl.pause();audioEl=null}playing=false}
+function tts(t){return new Promise(r=>{if(!('speechSynthesis'in window))return r();speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);u.lang='fil-PH';u.rate=.8;u.pitch=1.3;u.onend=u.onerror=()=>r();speechSynthesis.speak(u)})}
+function playKey(key,fallback){
+  const c=clips[key];playing=true;tgt=.7;
+  if(!c)return tts(fallback).then(()=>{playing=false;tgt=.12});
+  return new Promise(res=>{const url=URL.createObjectURL(c.data),a=new Audio(url);audioEl=a;
+    try{if(!actx){actx=new (window.AudioContext||window.webkitAudioContext)();an=actx.createAnalyser();an.fftSize=256;buf=new Uint8Array(an.fftSize)}
+      if(!a._src){const s=actx.createMediaElementSource(a);s.connect(an);an.connect(actx.destination)}}catch(e){}
+    const end=()=>{URL.revokeObjectURL(url);playing=false;tgt=.12;res()};a.onended=end;a.onerror=end;a.play().catch(end)})}
+const songText=d=>`Anong tunog ng ${d[0]}? Anong tunog ng ${d[0]}? ${d[0]}, ${d[0]}, ${d[0]}.`;
 
-// Speech recognition (native sa Android app, Web Speech API sa browser)
-async function listen() {
-  const cap = window.Capacitor;
-  const Native = cap && cap.Plugins && cap.Plugins.SpeechRecognition;
-  if (cap && cap.isNativePlatform && cap.isNativePlatform() && Native) {
-    const perm = await Native.requestPermissions();
-    if (perm.speechRecognition !== 'granted') throw new Error('NO_PERMISSION');
-    const r = await Native.start({ language:'en-US', maxResults:5, partialResults:false, popup:false });
-    return r.matches || [];
-  }
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) throw new Error('NOT_SUPPORTED');
-  return new Promise((resolve, reject) => {
-    const rec = new SR();
-    rec.lang = 'en-US'; rec.maxAlternatives = 5; rec.interimResults = false;
-    rec.onresult = e => resolve([...e.results[0]].map(x => x.transcript));
-    rec.onerror = e => reject(new Error(e.error));
-    rec.onnomatch = () => resolve([]);
-    rec.start();
-  });
-}
+/* ---------- Speech recognition ---------- */
+async function listen(){
+  const cap=window.Capacitor,N=cap&&cap.Plugins&&cap.Plugins.SpeechRecognition;
+  if(cap&&cap.isNativePlatform&&cap.isNativePlatform()&&N){
+    const p=await N.requestPermissions();if(p.speechRecognition!=='granted')throw new Error('NO_PERMISSION');
+    const r=await N.start({language:'en-US',maxResults:5,partialResults:false,popup:false});return r.matches||[]}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)throw new Error('NOT_SUPPORTED');
+  return new Promise((ok,no)=>{const r=new SR();r.lang='en-US';r.maxAlternatives=5;
+    r.onresult=e=>ok([...e.results[0]].map(x=>x.transcript));r.onerror=e=>no(new Error(e.error));r.onnomatch=()=>ok([]);
+    r.onend=()=>ok([]);r.start()})}
+const norm=s=>s.toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+function correct(ms,d){const w=norm(d[1]).replace(/ /g,'');
+  return ms.some(m=>{const n=norm(m),t=n.split(' ');return d[3].some(a=>t.includes(a)||n===a)||n.replace(/ /g,'').includes(w)})}
 
-// Pag-check ng sagot
-function norm(s) { return s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim(); }
-function check(matches, d) {
-  const word = norm(d.w).replace(/ /g, '');
-  let gotLetter = false, gotWord = false;
-  for (const m of matches) {
-    const n = norm(m), tokens = n.split(' ');
-    if (n.replace(/ /g, '').includes(word) || n.includes(norm(d.w))) gotWord = true;
-    if (d.a.some(a => tokens.includes(a) || n === a)) gotLetter = true;
-    if (tokens.includes('for') && gotWord) gotLetter = true;
-  }
-  return { gotLetter, gotWord, ok: gotLetter || gotWord };
-}
+/* ---------- Lesson flow ---------- */
+function setStage(cls,msg,reveal,d){$('stage').className='stage '+cls;$('msg').textContent=msg;
+  ['letter','emoji','word'].forEach(i=>$(i).classList.toggle('hide',!reveal));
+  if(reveal&&d){$('letter').textContent=d[0];$('emoji').textContent=d[2];$('word').textContent=d[1]}}
+function marks(){[...$('pick').children].forEach((b,i)=>b.classList.toggle('on',i===idx))}
+async function lesson(i,t){
+  idx=i;marks();const d=L[i];
+  while(t===token){
+    setStage('','🎧 Pakinggan si Teacher…',false);$('heard').textContent='';
+    await playKey('s:'+d[0],songText(d));if(t!==token)return false;
+    await playKey('intro',TTS.intro);if(t!==token)return false;
+    setStage('','🎤 Ikaw naman! Kumanta ka!',false);tgt=.45;
+    let ms=[];try{ms=await listen()}catch(e){tgt=.12;
+      setStage('bad',e.message==='NO_PERMISSION'?'Kailangan i-allow ang microphone.':e.message==='NOT_SUPPORTED'?'Hindi supported ang mic dito.':'Walang narinig. Ulit tayo!',false);
+      await new Promise(r=>setTimeout(r,1200));continue}
+    tgt=.12;if(t!==token)return false;
+    $('heard').textContent=ms.length?'Narinig: “'+ms[0]+'”':'';
+    if(correct(ms,d)){setStage('ok','🎉 Tama! '+d[0]+' for '+d[1]+'!',true,d);
+      await playKey('tama',TTS.tama);if(t!==token)return false;
+      await playKey('s:'+d[0],songText(d));return t===token}
+    setStage('bad','❌ Mali pa. Ulitin natin!',false);
+    await playKey('mali',TTS.mali)}
+  return false}
+async function runFrom(i,all){const t=++token;stopAudio();run=true;
+  for(let k=i;k<(all?L.length:i+1)&&t===token;k++){if(!await lesson(k,t))break}
+  if(t===token){run=false;setStage('ok','⭐ Tapos na! Magaling!',false)}}
+$('start').onclick=()=>{try{actx&&actx.resume()}catch(e){}runFrom(idx,false)};
+$('all').onclick=()=>{try{actx&&actx.resume()}catch(e){}runFrom(0,true)};
+$('stop').onclick=()=>{token++;stopAudio();tgt=.12;setStage('','Itinigil. Pindutin ang Simulan.',false)};
+L.forEach((d,i)=>{const b=document.createElement('button');b.className='alt';b.textContent=d[0];
+  b.onclick=()=>{idx=i;marks()};$('pick').appendChild(b)});marks();
 
-async function answer() {
-  if (busy) return;
-  busy = true; $('mic').classList.add('on'); $('card').className = 'card';
-  $('msg').textContent = '👂 Nakikinig...'; $('heard').textContent = '';
-  const d = LETTERS[idx];
-  try {
-    const matches = await listen();
-    $('heard').textContent = matches.length ? 'Narinig: “' + matches[0] + '”' : '';
-    const r = check(matches, d);
-    if (r.ok) {
-      $('msg').textContent = (r.gotLetter && r.gotWord) ? `🎉 Tama! ${d.l} for ${d.w}!` : `✅ Tama! ${d.l} for ${d.w}`;
-      if (!done.includes(d.l)) { done.push(d.l); localStorage.setItem('titik_done', JSON.stringify(done)); }
-      const msg = $('msg').textContent, heard = $('heard').textContent;
-      render();
-      $('msg').textContent = msg; $('heard').textContent = heard;
-      $('card').className = 'card ok';
-      speak('Very good!');
-    } else {
-      $('card').className = 'card bad';
-      $('msg').textContent = `❌ Subukan ulit: “${d.l} for ${d.w}”`;
-      speak(`${d.l} for ${d.w}`);
-    }
-  } catch (e) {
-    $('card').className = 'card bad';
-    $('msg').textContent = e.message === 'NO_PERMISSION' ? 'Kailangan i-allow ang microphone.' :
-                           e.message === 'NOT_SUPPORTED' ? 'Hindi supported ang speech recognition dito.' :
-                           'Walang narinig. Subukan ulit!';
-  }
-  $('mic').classList.remove('on'); busy = false;
-}
+/* ---------- Guro: record / export ---------- */
+let rec=null,recKey=null;
+function slotRow(key,title,sub){const r=document.createElement('div');r.className='slot';
+  r.innerHTML=`<span class="dot" data-d="${key}"></span><b>${title}<small>${sub}</small></b>
+  <button class="rec alt" data-r="${key}">⏺</button><button class="alt" data-p="${key}">▶</button><button class="alt" data-x="${key}">🗑</button>`;return r}
+function buildSlots(){const s=$('slots');s.innerHTML='';
+  SHARED.forEach(x=>s.appendChild(slotRow(x[0],x[1],x[2])));
+  L.forEach(d=>s.appendChild(slotRow('s:'+d[0],'Awit ng '+d[0],'"Anong tunog ng '+d[0]+'… '+d[0]+', '+d[0]+', '+d[0]+'"')));
+  refreshDots()}
+function refreshDots(){document.querySelectorAll('[data-d]').forEach(e=>e.classList.toggle('has',!!clips[e.dataset.d]))}
+async function toggleRec(key,btn){
+  if(rec){rec.stop();return}
+  try{const st=await navigator.mediaDevices.getUserMedia({audio:true});const ch=[];rec=new MediaRecorder(st);recKey=key;
+    rec.ondataavailable=e=>ch.push(e.data);
+    rec.onstop=()=>{st.getTracks().forEach(t=>t.stop());const b=new Blob(ch,{type:rec.mimeType||'audio/webm'});
+      clips[key]={type:b.type,data:b};dbPut(key,clips[key]);rec=null;btn.classList.remove('live');btn.textContent='⏺';refreshDots();
+      $('tmsg').textContent='Na-save ang clip.'};
+    rec.start();btn.classList.add('live');btn.textContent='⏹'}
+  catch(e){$('tmsg').textContent='Hindi ma-access ang mic. I-allow ang microphone.'}}
+$('slots').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.r)toggleRec(b.dataset.r,b);
+  else if(b.dataset.p){const k=b.dataset.p;stopAudio();playKey(k,k.startsWith('s:')?songText(L.find(d=>'s:'+d[0]===k)):TTS[k])}
+  else if(b.dataset.x){delete clips[b.dataset.x];dbDel(b.dataset.x);refreshDots()}};
+const toURL=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)});
+$('exp').onclick=async()=>{const o={app:'titik-karaoke',v:1,clips:{}};
+  for(const k in clips)o.clips[k]=await toURL(clips[k].data);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:'application/json'}));
+  a.download='aralin-titik.json';a.click();$('tmsg').textContent='Na-export ang aralin ('+Object.keys(o.clips).length+' clips).'};
+$('impB').onclick=()=>$('imp').click();
+$('imp').onchange=async e=>{const f=e.target.files[0];if(!f)return;
+  try{const o=JSON.parse(await f.text());for(const k in o.clips){const b=await (await fetch(o.clips[k])).blob();
+    clips[k]={type:b.type,data:b};dbPut(k,clips[k])}refreshDots();$('tmsg').textContent='Na-import ang aralin.'}
+  catch(x){$('tmsg').textContent='Hindi mabasa ang file.'}};
 
-// Karaoke mode
-async function karaoke() {
-  if ($('karaoke').dataset.on === '1') { stopKaraoke = true; speechSynthesis.cancel(); return; }
-  $('karaoke').dataset.on = '1'; $('karaoke').textContent = '⏹️ Itigil'; stopKaraoke = false;
-  for (let i = 0; i < LETTERS.length && !stopKaraoke; i++) {
-    idx = i; render();
-    await speak(`${LETTERS[i].l} for ${LETTERS[i].w}`, 0.75, 1.5);
-  }
-  $('karaoke').dataset.on = '0'; $('karaoke').textContent = '🎵 Kantahin ang A–Z';
-}
-
-$('listen').onclick = () => speak(`${LETTERS[idx].l} for ${LETTERS[idx].w}`);
-$('mic').onclick = answer;
-$('karaoke').onclick = karaoke;
-buildGrid(); render();
+/* ---------- Tabs ---------- */
+function tab(s){$('student').classList.toggle('hide',!s);$('teacher').classList.toggle('hide',s);
+  $('tabS').className=s?'on':'alt';$('tabT').className=s?'alt':'on';
+  if(!s){token++;stopAudio()}else fit()}
+$('tabS').onclick=()=>tab(true);$('tabT').onclick=()=>tab(false);
+dbReady.then(dbAll).then(()=>{buildSlots()});buildSlots();
 </script>
 </body>
 </html>
