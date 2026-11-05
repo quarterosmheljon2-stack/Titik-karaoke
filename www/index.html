@@ -5,90 +5,153 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Titik Karaoke</title>
 <style>
-:root{--bg:#10324a;--panel:#15405e;--ink:#fff8e8;--sun:#ffc531;--ok:#2fd27a;--bad:#ff5a5f;--mute:#9fc3d9}
+:root{--ink:#23316b;--sun:#ffc83d;--pink:#ff6fa5;--mint:#2fcf8a;--bad:#ff5a6e;--sky:#4cc3ff;--mute:#6b78a8;--card:#fff}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%}
-body{font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);
- padding:env(safe-area-inset-top) 14px calc(env(safe-area-inset-bottom) + 14px)}
-h1{font-size:24px;margin:14px 0 8px;text-align:center}
-button{font:inherit;font-weight:700;border:0;border-radius:16px;padding:13px;color:#10324a;background:var(--sun);
- box-shadow:0 4px 0 rgba(0,0,0,.3);cursor:pointer}
-button:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.3)}
-button.alt{background:var(--panel);color:var(--ink);box-shadow:none;border:2px solid #2a6288}
-button.on{background:var(--sun);color:#10324a;border-color:var(--sun)}
+body{font-family:"Chalkboard SE","Comic Sans MS","Trebuchet MS",ui-rounded,system-ui,sans-serif;color:var(--ink);
+ background:linear-gradient(#4cc3ff,#b9ecff 55%,#fff3c4) fixed;padding:calc(env(safe-area-inset-top) + 10px) 14px calc(env(safe-area-inset-bottom) + 14px)}
+h1{margin:0;font-size:40px;line-height:1;letter-spacing:1px}
+button{font:inherit;font-weight:800;color:var(--ink);background:var(--sun);border:0;border-radius:18px;padding:12px;box-shadow:0 4px 0 #d59b12;cursor:pointer}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 #d59b12}
+button.alt{background:#fff;box-shadow:0 4px 0 #b7d6ea}
+button.on{background:var(--pink);color:#fff;box-shadow:0 4px 0 #c94a80}
 .hide{display:none!important}
-.menu{display:flex;flex-direction:column;gap:14px;margin-top:22px}
-.menu button{font-size:20px;padding:22px 14px;text-align:left}
-.menu small{display:block;font-weight:400;font-size:14px;opacity:.8;margin-top:4px}
-.back{margin:8px 0 4px;padding:8px 14px;font-size:15px}
-.stage{background:var(--panel);border:6px solid var(--sun);border-radius:28px;padding:14px;text-align:center;transition:border-color .25s,background .25s}
-.stage.ok{border-color:var(--ok);background:#14614a}
-.stage.bad{border-color:var(--bad);background:#6a2a3c}
-canvas{width:100%;height:90px;display:block}
+/* splash */
+#splash{position:fixed;inset:0;z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+ background:linear-gradient(#2bb0f5,#8fe0ff 60%,#ffe9a8);transition:opacity .6s}
+#splash.out{opacity:0;pointer-events:none}
+.bounce{display:flex;gap:6px;font-size:54px;font-weight:900}
+.bounce span{animation:b 1s ease-in-out infinite;text-shadow:0 4px 0 rgba(0,0,0,.15)}
+.bounce span:nth-child(2n){animation-delay:.15s}.bounce span:nth-child(3n){animation-delay:.3s}
+.bar{width:70%;max-width:300px;height:16px;border-radius:99px;background:#fff8;overflow:hidden;border:3px solid #fff}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--sun));border-radius:99px}
+#ld{font-weight:800;margin:0}
+@keyframes b{50%{transform:translateY(-16px)}}
+/* home */
+#home{min-height:calc(100dvh - 24px);display:flex;flex-direction:column;align-items:center;text-align:center;position:relative}
+.hero{margin-top:34px;font-size:84px;display:flex;gap:6px;align-items:flex-end}
+.hero span{animation:b 1.6s ease-in-out infinite}.hero span:nth-child(2){animation-delay:.3s;font-size:56px}.hero span:nth-child(3){animation-delay:.6s}
+.notes{position:absolute;top:60px;left:0;right:0;font-size:28px;display:flex;justify-content:space-around;opacity:.7;pointer-events:none}
+.notes i{font-style:normal;animation:b 2.2s ease-in-out infinite}
+.sub{font-size:17px;font-weight:700;margin:8px 0 22px;color:var(--mute)}
+.go{font-size:26px;padding:18px 44px;border-radius:26px;background:var(--pink);color:#fff;box-shadow:0 6px 0 #c94a80}
+.dock{margin-top:auto;width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding-top:24px}
+.dock button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 2px;font-size:13px;background:#fff;box-shadow:0 4px 0 #b7d6ea}
+.dock b{font-size:30px;line-height:1.1}
+.top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.top h2{margin:0;font-size:22px;flex:1}
+.top button{padding:8px 14px}
+/* tabs */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none}
+.chips button{flex:none;padding:8px 16px;font-size:15px}
+/* stage */
+.stage{background:var(--card);border:6px solid var(--sun);border-radius:30px;padding:12px;text-align:center;transition:border-color .25s,background .25s;box-shadow:0 8px 0 rgba(35,49,107,.12)}
+.stage.ok{border-color:var(--mint);background:#e6fff3}
+.stage.bad{border-color:var(--bad);background:#ffe9ec}
+canvas{width:100%;height:80px;display:block}
 .letter{font-size:150px;font-weight:900;line-height:1.05;margin:0;color:transparent;-webkit-text-stroke:4px var(--ink);
- background:linear-gradient(to top,var(--c,#2fd27a) var(--f,0%),transparent var(--f,0%));-webkit-background-clip:text;background-clip:text}
-.fw{min-height:80px}
-.word{font-size:26px;font-weight:700}
-.emoji{font-size:48px}
+ background:linear-gradient(to top,var(--c,#2fcf8a) var(--f,0%),transparent var(--f,0%));-webkit-background-clip:text;background-clip:text}
+.letter[data-l="2"]{font-size:110px}.letter[data-l="3"]{font-size:78px}
+.fw{min-height:76px}.word{font-size:26px;font-weight:800}.emoji{font-size:40px}
 .lyr{margin:6px 0;min-height:86px}
-.lyr div{font-size:20px;font-weight:700;opacity:.45;transition:all .2s;padding:2px 0}
-.lyr .now{opacity:1;color:var(--sun);font-size:26px}
-.lyr .past{opacity:.7}
-.msg{font-size:18px;font-weight:700;min-height:48px;margin-top:6px}
+.lyr div{font-size:19px;font-weight:800;opacity:.4;padding:2px 0;transition:all .2s}
+.lyr .now{opacity:1;color:var(--pink);font-size:25px}.lyr .past{opacity:.7}
+.msg{font-size:18px;font-weight:800;min-height:46px;margin-top:6px}
 .heard{font-size:13px;color:var(--mute);min-height:18px}
 .row{display:flex;gap:10px;margin-top:12px}.row>*{flex:1}
 .pick{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:14px 0}
-.pick button{padding:9px 0;font-size:16px}
-.slot{display:flex;align-items:center;gap:6px;background:var(--panel);border-radius:16px;padding:10px;margin-bottom:8px}
+.pick button{padding:9px 0;font-size:15px}
+/* teacher / files */
+.slot{display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:#fff;border-radius:18px;padding:10px;margin-bottom:8px}
 .slot b{flex:1;font-size:15px;min-width:0}
-.slot small{display:block;font-weight:400;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.slot button{padding:8px 9px;flex:none;font-size:15px}
+.slot small{display:block;font-weight:600;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot .bt{flex-basis:100%;display:flex;gap:6px}.slot .bt button{flex:1;padding:8px 0;font-size:16px}
 .slot .rec.live{background:var(--bad);color:#fff;animation:p 1s infinite}
-.dot{width:12px;height:12px;border-radius:50%;background:#2a6288;flex:none}.dot.has{background:var(--ok)}
+.dot{width:12px;height:12px;border-radius:50%;background:#cfe0ee;flex:none}.dot.has{background:var(--mint)}
+.card{background:#fff;border-radius:22px;padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 8px;font-size:17px}.card button{width:100%;margin-top:8px}
+.note{font-size:14px;color:var(--mute);line-height:1.45;margin:8px 2px;font-weight:600}
+#ed{position:fixed;inset:0;background:#23316b99;z-index:50;display:flex;align-items:center;justify-content:center;padding:18px}
+#ed div{background:#fff;border-radius:22px;padding:16px;width:100%;max-width:420px}
+#ed textarea{width:100%;height:150px;border:3px solid var(--sky);border-radius:14px;padding:10px;font:inherit;color:var(--ink)}
 @keyframes p{50%{transform:scale(1.06)}}
-.note{font-size:14px;color:var(--mute);line-height:1.45;margin:8px 2px}
-@media (prefers-reduced-motion:reduce){.slot .rec.live{animation:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
 <body>
-<h1>🎤 Titik Karaoke</h1>
+
+<div id="splash">
+  <div class="bounce"><span style="color:#ff5a6e">A</span><span style="color:#ffc83d">B</span><span style="color:#2fcf8a">C</span><span style="color:#4a6cf7">1</span><span style="color:#ff6fa5">2</span><span style="color:#fff">3</span></div>
+  <div style="font-size:60px">🧒🎤👧</div>
+  <div class="bar"><i id="bar"></i></div>
+  <p id="ld">Nag-iinit ng boses…</p>
+</div>
 
 <!-- HOME -->
-<section id="home" class="menu">
-  <button id="goS">🧒 Kumanta (Bata)<small>Pakinggan ang awit, tapos ikaw naman!</small></button>
-  <button id="goT">👩‍🏫 Guro: Mag-upload ng kanta<small>Mag-record o pumili ng audio file, at ayusin ang lyrics</small></button>
-  <button class="alt" id="goI">📂 Mag-import ng aralin<small>Buksan ang .json na file mula sa Files</small></button>
+<section id="home">
+  <div class="notes"><i>🎵</i><i style="animation-delay:.5s">🎶</i><i style="animation-delay:1s">🎵</i></div>
+  <div class="hero"><span>🧒</span><span>🎤</span><span>👧</span></div>
+  <h1 style="margin-top:14px">Titik<br>Karaoke</h1>
+  <p class="sub">Kantahan ang ABC at 1 hanggang 100!</p>
+  <button class="go" id="goS">▶ Simulan</button>
+  <div class="dock">
+    <button id="dA"><b>🔤</b>ABC</button>
+    <button id="dN"><b>🔢</b>1–100</button>
+    <button id="dT"><b>🎙️</b>Guro</button>
+    <button id="dF"><b>📂</b>Files</button>
+  </div>
 </section>
 
-<!-- ESTUDYANTE -->
+<!-- BATA -->
 <section id="student" class="hide">
-  <button class="alt back" data-back>← Menu</button>
+  <div class="top"><button class="alt" data-back>←</button><h2 id="stTitle">ABC</h2></div>
+  <div class="chips" id="cats"></div>
+  <div class="chips" id="grps"></div>
   <div class="stage" id="stage">
-    <canvas id="wave" height="90"></canvas>
+    <canvas id="wave" height="80"></canvas>
     <div class="letter" id="letter">A</div>
     <div class="fw"><span class="emoji" id="emoji"></span><div class="word" id="word"></div></div>
     <div class="lyr" id="lyr"></div>
-    <div class="msg" id="msg">Pumili ng titik at pindutin ang Simulan.</div>
+    <div class="msg" id="msg">Pumili at pindutin ang Simulan.</div>
     <div class="heard" id="heard"></div>
   </div>
   <div class="row"><button id="start">▶️ Simulan</button><button class="alt" id="stop">⏹️ Itigil</button></div>
   <div class="pick" id="pick"></div>
-  <div class="row"><button class="alt" id="all">🎵 Lahat, A hanggang Z</button></div>
+  <div class="row"><button class="alt" id="all">🎵 Kantahin lahat</button></div>
 </section>
 
 <!-- GURO -->
 <section id="teacher" class="hide">
-  <button class="alt back" data-back>← Menu</button>
-  <p class="note">⏺ record · 📁 pumili ng audio file · ▶ pakinggan · ✏️ ayusin ang lyrics (isang linya bawat parirala) · 🗑 burahin. Walang clip? May robot voice na pamalit.</p>
+  <div class="top"><button class="alt" data-back>←</button><h2>Guro</h2></div>
+  <p class="note">🎙 mag-record · 📁 piliin sa Recordings/Files ng phone · ▶ pakinggan · ✏️ lyrics · ⬇️ i-export · 🗑 burahin. Kapag hindi bumukas ang mic, awtomatikong bubukas ang Recorder ng phone.</p>
+  <div class="chips" id="tcats"></div>
+  <div class="chips" id="tgrps"></div>
   <div id="slots"></div>
-  <div class="row"><button id="exp">⬇️ I-export (file)</button><button class="alt" id="impB">⬆️ I-import</button></div>
   <p class="note" id="tmsg"></p>
 </section>
+
+<!-- FILES -->
+<section id="files" class="hide">
+  <div class="top"><button class="alt" data-back>←</button><h2>Files</h2></div>
+  <div class="card"><h3>🔤 ABC songs</h3>
+    <button id="eAj">⬇️ I-export bilang aralin (.json)</button><button class="alt" id="eAa">🎧 I-export bilang audio files</button></div>
+  <div class="card"><h3>🔢 Numbers 1–100</h3>
+    <button id="eNj">⬇️ I-export bilang aralin (.json)</button><button class="alt" id="eNa">🎧 I-export bilang audio files</button></div>
+  <div class="card"><h3>📦 Lahat</h3>
+    <button id="eXj">⬇️ I-export lahat (.json)</button><button class="alt" id="impB">⬆️ I-import ng aralin</button></div>
+  <p class="note" id="fmsg"></p>
+</section>
+
+<div id="ed" class="hide"><div><b id="edT"></b><p class="note">Isang linya bawat parirala, ayon sa kinanta.</p><textarea id="edX"></textarea>
+ <div class="row"><button id="edS">Save</button><button class="alt" id="edC">Cancel</button></div></div></div>
 <input type="file" id="imp" accept=".json,application/json" class="hide">
 <input type="file" id="up" accept="audio/*" class="hide">
+<input type="file" id="cap" accept="audio/*" capture class="hide">
 
 <script>
-const L=[['A','Apple','🍎',['a','ay','hey','eh','8']],['B','Ball','⚽',['b','bee','be','bi','v']],['C','Cat','🐱',['c','see','sea','si']],
+const $=id=>document.getElementById(id);
+/* ---------- Data ---------- */
+const AB=[['A','Apple','🍎',['a','ay','hey','eh','8']],['B','Ball','⚽',['b','bee','be','bi','v']],['C','Cat','🐱',['c','see','sea','si']],
 ['D','Dog','🐶',['d','dee','di','the']],['E','Egg','🥚',['e','ee','he']],['F','Fish','🐟',['f','ef','eff','if']],
 ['G','Goat','🐐',['g','gee','ji','jee']],['H','Hat','🎩',['h','aitch','eich','age','ech']],['I','Ice cream','🍦',['i','eye','ai','aye']],
 ['J','Jar','🫙',['j','jay','jey']],['K','Kite','🪁',['k','kay','kei','okay']],['L','Lion','🦁',['l','el','elle','al']],
@@ -97,76 +160,79 @@ const L=[['A','Apple','🍎',['a','ay','hey','eh','8']],['B','Ball','⚽',['b','
 ['S','Sun','☀️',['s','es','ess','yes']],['T','Tree','🌳',['t','tee','tea','ti']],['U','Umbrella','☂️',['u','you','yu','ew']],
 ['V','Van','🚐',['v','vee','vi','we']],['W','Water','💧',['w','double u','doubleu','double you']],['X','X-ray','🩻',['x','ex','eggs']],
 ['Y','Yo-yo','🪀',['y','why','wai','wy']],['Z','Zebra','🦓',['z','zee','zed','zi']]];
-const SHARED=[['intro','Pambungad: "Ikaw naman…"','Tinutugon bago kumanta ang bata'],
- ['mali','Kapag mali: "Ulitin natin…"','Sinasabi kapag mali ang sagot'],
- ['tama','Kapag tama: "Tama ang sagot mo…"','Sinasabi kapag tama ang sagot']];
-const TTS={intro:'Ikaw naman!',mali:'Ulitin natin. Anong tunog ng letra?',tama:'Tama ang sagot mo! Pakinggan mo muli ako.'};
-const $=id=>document.getElementById(id);
-let idx=0,token=0,clips={},lyrics={};   // clips: key -> {type,data:Blob}; lyrics: 'A' -> text
+const ON=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+const TN=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+const nw=n=>n==100?'one hundred':n<20?ON[n]:TN[n/10|0]+(n%10?' '+ON[n%10]:'');
+const ABC=AB.map(d=>({k:'s:'+d[0],big:d[0],word:d[1],emoji:d[2],alts:d[3],t:'a'}));
+const NUM=Array.from({length:100},(_,i)=>({k:'n:'+(i+1),big:''+(i+1),word:nw(i+1),emoji:'⭐'.repeat(Math.min(i+1,10)),t:'n'}));
+const C={a:{name:'🔤 ABC',items:ABC,size:26},n:{name:'🔢 1–100',items:NUM,size:10}};
+const BY={};[...ABC,...NUM].forEach(x=>BY[x.k]=x);
+const SHARED=[['intro','Pambungad: "Ikaw naman…"','Bago kumanta ang bata'],['mali','Kapag mali: "Ulitin natin…"','Kapag mali ang sagot'],['tama','Kapag tama: "Tama ang sagot mo…"','Kapag tama ang sagot']];
+const TTS={intro:'Ikaw naman!',mali:'Ulitin natin. Ano ang tunog?',tama:'Tama ang sagot mo! Pakinggan mo muli ako.'};
+let cat='a',idx=0,token=0,clips={},lyrics={};
 
-/* ---------- Screens ---------- */
-function show(n){['home','student','teacher'].forEach(s=>$(s).classList.toggle('hide',s!==n));
-  if(n!=='student'){token++;stopAudio()}else fit()}
-$('goS').onclick=()=>show('student');$('goT').onclick=()=>show('teacher');$('goI').onclick=()=>$('imp').click();
-document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>show('home'));
-
-/* ---------- IndexedDB ---------- */
+/* ---------- Splash ---------- */
 let db;
-const dbReady=new Promise(r=>{try{const q=indexedDB.open('titik',1);q.onupgradeneeded=()=>q.result.createObjectStore('c');
- q.onsuccess=()=>{db=q.result;r()};q.onerror=()=>r()}catch(e){r()}});
-function dbAll(){return new Promise(r=>{if(!db)return r();const o=db.transaction('c').objectStore('c').openCursor();
- o.onsuccess=()=>{const c=o.result;if(c){if(c.key.startsWith('ly:'))lyrics[c.key.slice(3)]=c.value;else clips[c.key]=c.value;c.continue()}else r()};o.onerror=()=>r()})}
+const ready=new Promise(r=>{try{const q=indexedDB.open('titik',1);q.onupgradeneeded=()=>q.result.createObjectStore('c');
+ q.onsuccess=()=>{db=q.result;r()};q.onerror=()=>r()}catch(e){r()}}).then(()=>new Promise(r=>{if(!db)return r();
+ const o=db.transaction('c').objectStore('c').openCursor();o.onsuccess=()=>{const c=o.result;if(c){
+  if(c.key.startsWith('ly:')){const n=c.key.slice(3);lyrics[n.includes(':')?n:'s:'+n]=c.value}else clips[c.key]=c.value;c.continue()}else r()};o.onerror=()=>r()}));
+{let p=0;const m=['Nag-iinit ng boses…','Inaayos ang mga titik at numero…','Handa na tayong kumanta!'];
+ const iv=setInterval(()=>{p=Math.min(100,p+2+Math.random()*3);$('bar').style.width=p+'%';$('ld').textContent=m[Math.min(2,p/34|0)];
+  if(p>=100){clearInterval(iv);ready.then(()=>{buildSlots();marks();$('splash').classList.add('out');setTimeout(()=>$('splash').remove(),700)})}},80)}
 function dbPut(k,v){if(db)db.transaction('c','readwrite').objectStore('c').put(v,k)}
 function dbDel(k){if(db)db.transaction('c','readwrite').objectStore('c').delete(k)}
 
+/* ---------- Screens ---------- */
+function show(n){['home','student','teacher','files'].forEach(s=>$(s).classList.toggle('hide',s!==n));
+  if(n!=='student'){token++;stopAudio()}else fit();scrollTo(0,0)}
+function go(c){cat=c;idx=0;show('student');marks()}
+$('goS').onclick=()=>go(cat);$('dA').onclick=()=>go('a');$('dN').onclick=()=>go('n');
+$('dT').onclick=()=>{show('teacher');buildSlots()};$('dF').onclick=()=>show('files');
+document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>show('home'));
+function chips(el,list,active,cb){el.innerHTML='';list.forEach(([v,t])=>{const b=document.createElement('button');b.textContent=t;
+  b.className=v===active?'on':'alt';b.onclick=()=>cb(v);el.appendChild(b)})}
+const groupsOf=c=>Array.from({length:Math.ceil(C[c].items.length/C[c].size)},(_,g)=>[g,C[c].size==26?'A–Z':(g*10+1)+'–'+(g*10+10)]);
+
 /* ---------- Sound wave ---------- */
-const cv=$('wave'),cx=cv.getContext('2d');let level=0,tgt=0.12,ph=0,actx,an,buf;
-function fit(){const r=devicePixelRatio||1;cv.width=cv.clientWidth*r;cv.height=90*r}
+const cv=$('wave'),cx=cv.getContext('2d');let level=0,tgt=.12,ph=0,actx,an,buf,playing=false,audioEl=null;
+function fit(){const r=devicePixelRatio||1;cv.width=cv.clientWidth*r;cv.height=80*r}
 addEventListener('resize',fit);
-function draw(){
-  const w=cv.width,h=cv.height,r=devicePixelRatio||1;let a=tgt;
+function draw(){const w=cv.width,h=cv.height,r=devicePixelRatio||1;let a=tgt;
   if(an&&playing){an.getByteTimeDomainData(buf);let s=0;for(const v of buf)s+=Math.abs(v-128);a=Math.max(.15,Math.min(1,s/buf.length/40))}
   level+=(a-level)*.15;ph+=.12;cx.clearRect(0,0,w,h);cx.lineCap='round';cx.lineWidth=5*r;
   const n=Math.max(2,Math.floor(w/(12*r)));
-  for(let i=0;i<n;i++){const x=(i+.5)*w/n,e=Math.sin(Math.PI*i/(n-1));
-    const v=(Math.sin(i*.45+ph)*.5+.5)*.7+.3,len=Math.max(4*r,level*v*e*h*.9);
-    cx.strokeStyle=i%2?'#ffc531':'#8fe3ff';cx.beginPath();cx.moveTo(x,h/2-len/2);cx.lineTo(x,h/2+len/2);cx.stroke()}
+  for(let i=0;i<n;i++){const x=(i+.5)*w/n,e=Math.sin(Math.PI*i/(n-1)),v=(Math.sin(i*.45+ph)*.5+.5)*.7+.3,len=Math.max(4*r,level*v*e*h*.9);
+    cx.strokeStyle=['#4cc3ff','#ff6fa5','#ffc83d','#2fcf8a'][i%4];cx.beginPath();cx.moveTo(x,h/2-len/2);cx.lineTo(x,h/2+len/2);cx.stroke()}
   requestAnimationFrame(draw)}
 draw();
 
-/* ---------- Lyrics (synced to audio / robot voice) ---------- */
-const defLy=d=>[`Anong tunog ng ${d[0]}?`,`Anong tunog ng ${d[0]}?`,`${d[0]}, ${d[0]}, ${d[0]}!`,`${d[0]} for ${d[1]}`];
-const lyOf=d=>(lyrics[d[0]]||defLy(d).join('\n')).split('\n').map(s=>s.trim()).filter(Boolean);
-function showLy(lines){$('lyr').innerHTML='';lines.forEach(t=>{const e=document.createElement('div');e.textContent=t;$('lyr').appendChild(e)})}
+/* ---------- Lyrics ---------- */
+const defLy=it=>it.t==='a'?[`Anong tunog ng ${it.big}?`,`Anong tunog ng ${it.big}?`,`${it.big}, ${it.big}, ${it.big}!`,`${it.big} for ${it.word}`]
+ :[`Bilangin natin ang ${it.big}!`,`${it.big}, ${it.big}, ${it.big}!`,`${it.big} is ${it.word}`];
+const lyOf=it=>(lyrics[it.k]||defLy(it).join('\n')).split('\n').map(s=>s.trim()).filter(Boolean);
+function showLy(l){$('lyr').innerHTML='';l.forEach(t=>{const e=document.createElement('div');e.textContent=t;$('lyr').appendChild(e)})}
 function hl(i){[...$('lyr').children].forEach((e,j)=>e.className=j===i?'now':j<i?'past':'')}
-const lineAt=(lines,p)=>{const tot=lines.reduce((s,l)=>s+l.length+4,0);let acc=0;
-  for(let i=0;i<lines.length;i++){acc+=lines[i].length+4;if(p*tot<acc)return i}return lines.length-1};
+const lineAt=(l,p)=>{const tot=l.reduce((s,x)=>s+x.length+4,0);let acc=0;for(let i=0;i<l.length;i++){acc+=l[i].length+4;if(p*tot<acc)return i}return l.length-1};
 
-/* ---------- Playback (teacher clip or robot voice) ---------- */
-let playing=false,audioEl=null;
+/* ---------- Playback ---------- */
 function stopAudio(){speechSynthesis.cancel();if(audioEl){audioEl.pause();audioEl=null}playing=false}
 function tts(t,lines){return new Promise(r=>{if(!('speechSynthesis'in window))return r();speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(t);u.lang='fil-PH';u.rate=.8;u.pitch=1.3;u.onend=u.onerror=()=>r();
-  if(lines){const st=[];let o=0;lines.forEach(l=>{st.push(o);o+=l.length+2});
-    u.onboundary=e=>{let i=0;st.forEach((s,k)=>{if(e.charIndex>=s)i=k});hl(i)}}
+  if(lines){const st=[];let o=0;lines.forEach(l=>{st.push(o);o+=l.length+2});u.onboundary=e=>{let i=0;st.forEach((s,k)=>{if(e.charIndex>=s)i=k});hl(i)}}
   speechSynthesis.speak(u)})}
-function playKey(key,fallback,lines){
-  const c=clips[key];playing=true;tgt=.7;
-  if(lines){showLy(lines);hl(0)}
-  if(!c)return tts(fallback,lines).then(()=>{playing=false;tgt=.12;if(lines)hl(lines.length)});
+function playKey(key,fb,lines){const c=clips[key];playing=true;tgt=.7;if(lines){showLy(lines);hl(0)}
+  if(!c)return tts(fb,lines).then(()=>{playing=false;tgt=.12;if(lines)hl(lines.length)});
   return new Promise(res=>{const url=URL.createObjectURL(c.data),a=new Audio(url);audioEl=a;
     try{if(!actx){actx=new (window.AudioContext||window.webkitAudioContext)();an=actx.createAnalyser();an.fftSize=256;buf=new Uint8Array(an.fftSize)}
       const s=actx.createMediaElementSource(a);s.connect(an);an.connect(actx.destination)}catch(e){}
     if(lines)a.ontimeupdate=()=>{if(a.duration&&isFinite(a.duration))hl(lineAt(lines,a.currentTime/a.duration))};
     const end=()=>{URL.revokeObjectURL(url);playing=false;tgt=.12;if(lines)hl(lines.length);res()};a.onended=end;a.onerror=end;a.play().catch(end)})}
-const songText=d=>lyOf(d).join('. ');
-
-/* ---------- Letter fill animation (green = tama, red = mali) ---------- */
+const songText=it=>lyOf(it).join('. ');
 let fillT=0;
 function fill(color,ms){const el=$('letter'),id=++fillT;el.style.setProperty('--c',color);
   if(!ms){el.style.setProperty('--f','0%');return}
-  const t0=performance.now();(function f(t){if(id!==fillT)return;const p=Math.min(1,(t-t0)/ms);
-    el.style.setProperty('--f',(p*100)+'%');if(p<1)requestAnimationFrame(f)})(t0)}
+  const t0=performance.now();(function f(t){if(id!==fillT)return;const p=Math.min(1,(t-t0)/ms);el.style.setProperty('--f',(p*100)+'%');if(p<1)requestAnimationFrame(f)})(t0)}
 
 /* ---------- Speech recognition ---------- */
 async function listen(){
@@ -176,94 +242,113 @@ async function listen(){
     const r=await N.start({language:'en-US',maxResults:5,partialResults:false,popup:false});return r.matches||[]}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)throw new Error('NOT_SUPPORTED');
   return new Promise((ok,no)=>{const r=new SR();r.lang='en-US';r.maxAlternatives=5;
-    r.onresult=e=>ok([...e.results[0]].map(x=>x.transcript));r.onerror=e=>no(new Error(e.error));r.onnomatch=()=>ok([]);
-    r.onend=()=>ok([]);r.start()})}
+    r.onresult=e=>ok([...e.results[0]].map(x=>x.transcript));r.onerror=e=>no(new Error(e.error));r.onnomatch=()=>ok([]);r.onend=()=>ok([]);r.start()})}
 const norm=s=>s.toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
-function correct(ms,d){const w=norm(d[1]).replace(/ /g,'');
-  return ms.some(m=>{const n=norm(m),t=n.split(' ');return d[3].some(a=>t.includes(a)||n===a)||n.replace(/ /g,'').includes(w)})}
+function correct(ms,it){
+  if(it.t==='n'){const w=it.word.replace(/ /g,'');return ms.some(m=>{const n=norm(m);return n===it.big||n.replace(/ /g,'')===w})}
+  const w=norm(it.word).replace(/ /g,'');
+  return ms.some(m=>{const n=norm(m),t=n.split(' ');return it.alts.some(a=>t.includes(a)||n===a)||n.replace(/ /g,'').includes(w)})}
 
-/* ---------- Lesson flow ---------- */
-function setStage(cls,msg,reveal,d){$('stage').className='stage '+cls;$('msg').textContent=msg;
-  $('emoji').textContent=reveal&&d?d[2]:'';$('word').textContent=reveal&&d?d[1]:''}
-function marks(){[...$('pick').children].forEach((b,i)=>b.classList.toggle('on',i===idx));$('letter').textContent=L[idx][0];fill('#2fd27a',0)}
+/* ---------- Lesson ---------- */
+const cur=()=>C[cat].items[idx];
+function setStage(cls,msg,reveal,it){$('stage').className='stage '+cls;$('msg').textContent=msg;
+  $('emoji').textContent=reveal&&it?it.emoji:'';$('word').textContent=reveal&&it?(it.t==='a'?it.word:it.word):''}
+function marks(){const c=C[cat],it=cur();$('stTitle').textContent=c.name;
+  chips($('cats'),[['a',C.a.name],['n',C.n.name]],cat,v=>{token++;stopAudio();cat=v;idx=0;marks();setStage('','Pumili at pindutin ang Simulan.')});
+  const g=Math.floor(idx/c.size);
+  if(cat==='n')chips($('grps'),groupsOf('n'),g,v=>{idx=v*10;marks()});else $('grps').innerHTML='';
+  $('pick').innerHTML='';c.items.slice(g*c.size,(g+1)*c.size).forEach((x,j)=>{const i=g*c.size+j,b=document.createElement('button');
+    b.className=i===idx?'on':'alt';b.textContent=x.big;b.onclick=()=>{idx=i;marks()};$('pick').appendChild(b)});
+  $('letter').textContent=it.big;$('letter').dataset.l=it.big.length;fill('#2fcf8a',0)}
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
-async function lesson(i,t){
-  idx=i;marks();const d=L[i];
+async function lesson(i,t){idx=i;marks();const it=cur();
   while(t===token){
-    fill('#2fd27a',0);setStage('','🎧 Pakinggan si Teacher…',false);$('heard').textContent='';
-    await playKey('s:'+d[0],songText(d),lyOf(d));if(t!==token)return false;
+    fill('#2fcf8a',0);setStage('','🎧 Pakinggan si Teacher…',false);$('heard').textContent='';
+    await playKey(it.k,songText(it),lyOf(it));if(t!==token)return false;
     await playKey('intro',TTS.intro);if(t!==token)return false;
     setStage('','🎤 Ikaw naman! Kumanta ka!',false);tgt=.45;
     let ms=[];try{ms=await listen()}catch(e){tgt=.12;
-      setStage('bad',e.message==='NO_PERMISSION'?'Kailangan i-allow ang microphone.':e.message==='NOT_SUPPORTED'?'Hindi supported ang mic dito.':'Walang narinig. Ulit tayo!',false);
-      await wait(1200);continue}
+      setStage('bad',e.message==='NO_PERMISSION'?'Kailangan i-allow ang microphone.':e.message==='NOT_SUPPORTED'?'Hindi supported ang mic dito.':'Walang narinig. Ulit tayo!',false);await wait(1200);continue}
     tgt=.12;if(t!==token)return false;
     $('heard').textContent=ms.length?'Narinig: “'+ms[0]+'”':'';
-    if(correct(ms,d)){setStage('ok','🎉 Tama! '+d[0]+' for '+d[1]+'!',true,d);fill('#2fd27a',1100);
+    if(correct(ms,it)){setStage('ok','🎉 Tama! '+(it.t==='a'?it.big+' for '+it.word:it.big+'is '+it.word)+'!',true,it);fill('#2fcf8a',1100);
       await playKey('tama',TTS.tama);if(t!==token)return false;
-      await playKey('s:'+d[0],songText(d),lyOf(d));return t===token}
-    setStage('bad','❌ Mali pa. Ulitin natin!',false);fill('#ff5a5f',900);
+      await playKey(it.k,songText(it),lyOf(it));return t===token}
+    setStage('bad','❌ Mali pa. Ulitin natin!',false);fill('#ff5a6e',900);
     await playKey('mali',TTS.mali);await wait(300)}
   return false}
-async function runFrom(i,all){const t=++token;stopAudio();
-  for(let k=i;k<(all?L.length:i+1)&&t===token;k++){if(!await lesson(k,t))break}
+async function runFrom(i,all){const t=++token;stopAudio();const n=C[cat].items.length;
+  for(let k=i;k<(all?n:i+1)&&t===token;k++){if(!await lesson(k,t))break}
   if(t===token)setStage('ok','⭐ Tapos na! Magaling!',false)}
-$('start').onclick=()=>{try{actx&&actx.resume()}catch(e){}runFrom(idx,false)};
-$('all').onclick=()=>{try{actx&&actx.resume()}catch(e){}runFrom(0,true)};
+const wake=()=>{try{actx&&actx.resume()}catch(e){}};
+$('start').onclick=()=>{wake();runFrom(idx,false)};
+$('all').onclick=()=>{wake();runFrom(0,true)};
 $('stop').onclick=()=>{token++;stopAudio();tgt=.12;setStage('','Itinigil. Pindutin ang Simulan.',false)};
-L.forEach((d,i)=>{const b=document.createElement('button');b.className='alt';b.textContent=d[0];
-  b.onclick=()=>{idx=i;marks()};$('pick').appendChild(b)});marks();
 
-/* ---------- Guro: record / upload / lyrics ---------- */
-let rec=null,upKey=null;
+/* ---------- Guro ---------- */
+const say=t=>{$('tmsg').textContent=t;$('fmsg').textContent=t};
+let rec=null,upKey=null,tc='a',tg=0;
 function slotRow(key,title,sub,isL){const r=document.createElement('div');r.className='slot';
-  r.innerHTML=`<span class="dot" data-d="${key}"></span><b>${title}<small>${sub}</small></b>
-  <button class="rec alt" data-r="${key}">⏺</button><button class="alt" data-u="${key}">📁</button><button class="alt" data-p="${key}">▶</button>${isL?`<button class="alt" data-l="${key}">✏️</button>`:''}<button class="alt" data-x="${key}">🗑</button>`;return r}
+  r.innerHTML=`<span class="dot" data-d="${key}"></span><b>${title}<small>${sub}</small></b><div class="bt">
+  <button class="rec alt" data-r="${key}">🎙</button><button class="alt" data-u="${key}">📁</button><button class="alt" data-p="${key}">▶</button>${isL?`<button class="alt" data-l="${key}">✏️</button>`:''}<button class="alt" data-e="${key}">⬇️</button><button class="alt" data-x="${key}">🗑</button></div>`;return r}
 function buildSlots(){const s=$('slots');s.innerHTML='';
-  SHARED.forEach(x=>s.appendChild(slotRow(x[0],x[1],x[2])));
-  L.forEach(d=>s.appendChild(slotRow('s:'+d[0],'Awit ng '+d[0],lyOf(d).join(' / '),true)));refreshDots()}
-function refreshDots(){document.querySelectorAll('[data-d]').forEach(e=>e.classList.toggle('has',!!clips[e.dataset.d]))}
-function saveClip(key,b){clips[key]={type:b.type,data:b};dbPut(key,clips[key]);refreshDots()}
+  chips($('tcats'),[['a',C.a.name],['n',C.n.name],['s','🗣 Boses']],tc,v=>{tc=v;tg=0;buildSlots()});
+  if(tc==='n')chips($('tgrps'),groupsOf('n'),tg,v=>{tg=v;buildSlots()});else $('tgrps').innerHTML='';
+  if(tc==='s')SHARED.forEach(x=>s.appendChild(slotRow(x[0],x[1],x[2])));
+  else{const c=C[tc];c.items.slice(tg*c.size,(tg+1)*c.size).forEach(it=>s.appendChild(slotRow(it.k,'Awit ng '+it.big+(it.t==='n'?' ('+it.word+')':''),lyOf(it).join(' / '),true)))}
+  refreshDots()}
+const refreshDots=()=>document.querySelectorAll('[data-d]').forEach(e=>e.classList.toggle('has',!!clips[e.dataset.d]));
+function saveClip(k,b){clips[k]={type:b.type,data:b};dbPut(k,clips[k]);refreshDots()}
 async function toggleRec(key,btn){
   if(rec){rec.stop();return}
-  try{const st=await navigator.mediaDevices.getUserMedia({audio:true});const ch=[];rec=new MediaRecorder(st);
-    rec.ondataavailable=e=>ch.push(e.data);
+  upKey=key;
+  try{if(!navigator.mediaDevices||!window.MediaRecorder)throw 0;
+    const st=await navigator.mediaDevices.getUserMedia({audio:true}),ch=[];
+    const mt=['audio/webm;codecs=opus','audio/mp4','audio/webm','audio/ogg'].find(t=>MediaRecorder.isTypeSupported(t));
+    rec=new MediaRecorder(st,mt?{mimeType:mt}:undefined);rec.ondataavailable=e=>ch.push(e.data);
     rec.onstop=()=>{st.getTracks().forEach(t=>t.stop());saveClip(key,new Blob(ch,{type:rec.mimeType||'audio/webm'}));
-      rec=null;btn.classList.remove('live');btn.textContent='⏺';$('tmsg').textContent='Na-save ang clip.'};
+      rec=null;btn.classList.remove('live');btn.textContent='🎙';say('Na-save ang recording.')};
     rec.start();btn.classList.add('live');btn.textContent='⏹'}
-  catch(e){$('tmsg').textContent='Hindi ma-access ang mic. I-allow ang microphone.'}}
-$('slots').onclick=e=>{const b=e.target.closest('button');if(!b)return;
-  if(b.dataset.r)toggleRec(b.dataset.r,b);
-  else if(b.dataset.u){upKey=b.dataset.u;$('up').value='';$('up').click()}
-  else if(b.dataset.p){const k=b.dataset.p;stopAudio();
-    if(k.startsWith('s:')){const d=L.find(x=>'s:'+x[0]===k);show('student');idx=L.indexOf(d);marks();playKey(k,songText(d),lyOf(d))}
-    else playKey(k,TTS[k])}
-  else if(b.dataset.l){const d=L.find(x=>'s:'+x[0]===b.dataset.l);
-    const v=prompt('Lyrics ng '+d[0]+' (isang linya bawat parirala, ayon sa kinanta):',lyOf(d).join('\n'));
-    if(v!==null){lyrics[d[0]]=v;dbPut('ly:'+d[0],v);buildSlots();$('tmsg').textContent='Na-save ang lyrics.'}}
-  else if(b.dataset.x){delete clips[b.dataset.x];dbDel(b.dataset.x);refreshDots()}};
-$('up').onchange=e=>{const f=e.target.files[0];if(!f||!upKey)return;saveClip(upKey,new Blob([f],{type:f.type||'audio/mpeg'}));$('tmsg').textContent='Na-upload: '+f.name};
+  catch(e){rec=null;say('Hindi mabuksan ang mic dito, kaya bubuksan ang Recorder ng phone. Pagkatapos mag-record, i-save ito.');$('cap').value='';$('cap').click()}}
+const gotFile=e=>{const f=e.target.files[0];if(!f||!upKey)return;saveClip(upKey,new Blob([f],{type:f.type||'audio/mpeg'}));say('Na-save: '+f.name)};
+$('up').onchange=gotFile;$('cap').onchange=gotFile;
+function editLy(it){$('edT').textContent='Lyrics ng '+it.big;$('edX').value=lyOf(it).join('\n');$('ed').classList.remove('hide');
+  $('edS').onclick=()=>{lyrics[it.k]=$('edX').value;dbPut('ly:'+it.k,$('edX').value);$('ed').classList.add('hide');buildSlots();say('Na-save ang lyrics.')};
+  $('edC').onclick=()=>$('ed').classList.add('hide')}
+$('slots').onclick=e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+  if(d.r)toggleRec(d.r,b);
+  else if(d.u){upKey=d.u;$('up').value='';$('up').click()}
+  else if(d.p){stopAudio();const it=BY[d.p];if(it){cat=it.t;idx=C[cat].items.indexOf(it);show('student');marks();playKey(it.k,songText(it),lyOf(it))}else playKey(d.p,TTS[d.p])}
+  else if(d.l)editLy(BY[d.l]);
+  else if(d.e)exportAudio(k=>k===d.e);
+  else if(d.x){delete clips[d.x];dbDel(d.x);refreshDots()}};
 
-/* ---------- Export / Import (real files) ---------- */
+/* ---------- Export / Import ---------- */
+const ext=t=>/mp4|aac|m4a/.test(t)?'m4a':/ogg/.test(t)?'ogg':/mpeg|mp3/.test(t)?'mp3':/wav/.test(t)?'wav':'webm';
 const toURL=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)});
-async function saveFile(blob,name){
-  if(window.showSaveFilePicker){try{const h=await showSaveFilePicker({suggestedName:name,types:[{description:'Aralin',accept:{'application/json':['.json']}}]});
-    const w=await h.createWritable();await w.write(blob);await w.close();return 'Na-save sa file: '+h.name}catch(e){if(e.name==='AbortError')return 'Kinansela.'}}
-  const f=new File([blob],name,{type:'application/json'});
-  if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:name});return 'Handa na: piliin ang Files/Drive para i-save.'}catch(e){if(e.name==='AbortError')return 'Kinansela.'}}
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();return 'Na-download ang '+name}
-$('exp').onclick=async()=>{const o={app:'titik-karaoke',v:2,clips:{},lyrics};
-  for(const k in clips)o.clips[k]=await toURL(clips[k].data);
-  $('tmsg').textContent=await saveFile(new Blob([JSON.stringify(o)],{type:'application/json'}),'aralin-titik.json')+' ('+Object.keys(o.clips).length+' clips)'};
+function dl(f){const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+async function sendFiles(fs,desc){
+  if(window.showSaveFilePicker&&fs.length===1){try{const h=await showSaveFilePicker({suggestedName:fs[0].name,types:[{description:desc,accept:{[fs[0].type||'application/octet-stream']:['.'+fs[0].name.split('.').pop()]}}]});
+    const w=await h.createWritable();await w.write(fs[0]);await w.close();return 'Na-save: '+h.name}catch(e){if(e.name==='AbortError')return 'Kinansela.'}}
+  if(navigator.canShare&&navigator.canShare({files:fs})){try{await navigator.share({files:fs,title:desc});return 'Handa na: piliin ang Files/Drive para i-save.'}catch(e){if(e.name==='AbortError')return 'Kinansela.'}}
+  fs.forEach((f,i)=>setTimeout(()=>dl(f),i*400));return 'Dina-download ang '+fs.length+' file.'}
+async function exportAudio(fn){const fs=Object.keys(clips).filter(fn).map(k=>{const t=clips[k].data.type||'audio/webm';
+  return new File([clips[k].data],'titik-'+k.replace(':','-')+'.'+ext(t),{type:t})});
+  say(fs.length?await sendFiles(fs,'Awit'):'Wala pang naka-record na clip dito.')}
+async function exportJSON(pre){const o={app:'titik-karaoke',v:3,clips:{},lyrics:{}},ok=k=>pre===''||k.startsWith(pre);
+  for(const k in clips)if(ok(k))o.clips[k]=await toURL(clips[k].data);
+  for(const k in lyrics)if(ok(k))o.lyrics[k]=lyrics[k];
+  const n=Object.keys(o.clips).length;if(!n)return say('Wala pang clip na ie-export.');
+  say(await sendFiles([new File([JSON.stringify(o)],'aralin-titik'+(pre?'-'+pre[0]:'')+'.json',{type:'application/json'})],'Aralin')+' ('+n+' clips)')}
+$('eAj').onclick=()=>exportJSON('s:');$('eNj').onclick=()=>exportJSON('n:');$('eXj').onclick=()=>exportJSON('');
+$('eAa').onclick=()=>exportAudio(k=>k.startsWith('s:'));$('eNa').onclick=()=>exportAudio(k=>k.startsWith('n:'));
 $('impB').onclick=()=>$('imp').click();
+$('dF').addEventListener('click',()=>{});
 $('imp').onchange=async e=>{const f=e.target.files[0];if(!f)return;
-  try{const o=JSON.parse(await f.text());for(const k in o.clips){const b=await (await fetch(o.clips[k])).blob();
-    clips[k]={type:b.type,data:b};dbPut(k,clips[k])}
-    for(const k in (o.lyrics||{})){lyrics[k]=o.lyrics[k];dbPut('ly:'+k,o.lyrics[k])}
-    buildSlots();marks();$('tmsg').textContent='Na-import ang aralin.';show('teacher')}
-  catch(x){$('tmsg').textContent='Hindi mabasa ang file.';show('teacher')}};
-
-dbReady.then(dbAll).then(()=>{buildSlots();marks()});buildSlots();
+  try{const o=JSON.parse(await f.text());for(const k in o.clips){const b=await (await fetch(o.clips[k])).blob();clips[k]={type:b.type,data:b};dbPut(k,clips[k])}
+    for(const k in (o.lyrics||{})){const kk=k.includes(':')?k:'s:'+k;lyrics[kk]=o.lyrics[k];dbPut('ly:'+kk,o.lyrics[k])}
+    buildSlots();marks();show('files');say('Na-import ang aralin.')}
+  catch(x){show('files');say('Hindi mabasa ang file.')}};
 </script>
 </body>
 </html>
